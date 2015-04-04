@@ -4,8 +4,8 @@ Propagate Security Context through JMS in JBoss/WildFly.
 
 * Prerequisites
 
-- JavaEE 7 JBoss/WildFly container
-- Security domain configuration
+1. JavaEE 7 JBoss/WildFly container
+2. Security domain configuration
 
 * Build
 
