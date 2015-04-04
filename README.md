@@ -1,8 +1,6 @@
 # JBoss/WildFly JMS Security
 
-Propagate Security Context to JMS bindings in JBoss EAP/WildFly
-
-The helper method ```SecureMessage.fromRequest``` creates the following credentials: PrincipalCredential, ConfidentialityCredential and SubjectCredential based on JAAS and JACC contexts.
+Propagate Security Context through JMS in JBoss EAP/WildFly.
 
 * Build
 
@@ -18,24 +16,64 @@ The helper method ```SecureMessage.fromRequest``` creates the following credenti
 </dependency>
 ```
 
-* Usage (WildFly)
+* Usage
 
 ```java
-@ApplicationScoped
+@Stateless
 public class QueueSender {
 
     @Inject
     private JMSContext jmsContext;
 
-    @Inject
-    private HttpServletRequest servletRequest;
-
     @Resource(mappedName = "java:/jms/Queue")
     private Queue destination;
 
-    public void sendToQueue(final Serializable object) {
-        final SecureMessage message = SecureMessage.fromRequest(servletRequest, object);
+    public void sendToQueue(final MyObject myObject) {
+        final SecureMessage message = new SecureMessage(myObject);
         jmsContext.createProducer().send(destination, message);
+    }
+}
+```
+
+```java
+@MessageDriven(activationConfig = {
+    @ActivationConfigProperty(propertyName = "acknowledgeMode",
+            propertyValue = "Auto-acknowledge"),
+    @ActivationConfigProperty(propertyName = "destinationType",
+            propertyValue = "javax.jms.Queue"),
+    @ActivationConfigProperty(propertyName = "destinationLookup",
+            propertyValue = "java:/jms/Queue")
+})
+@Interceptors(JmsSecurityInterceptor.class)
+public class QueueConsumer implements MessageListener {
+
+    @EJB
+    private SecuredEJB securedEJB;
+
+    @Override
+    public void onMessage(Message message) {
+        try {
+            final SecureMessage secureMessage = message.getBody(SecureMessage.class);
+            final MyObject myObject = secureMessage.getContent(MyObject.class);
+            securedEJB.process(myObject);
+        } catch (JMSException ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
+    }
+
+}
+```
+
+```java
+@Stateless
+@RolesAllowed("admin")
+public class SecuredEJB {
+
+    @Resource
+    private EJBContext context;
+
+    public void process(MyObject myObject) {
+        System.out.println("Name: " + context.getCallerPrincipal().getName());
     }
 }
 ```
