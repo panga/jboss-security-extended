@@ -25,9 +25,8 @@ public final class JmsSecurityInterceptor {
         if ("onMessage".equals(method.getName())
                 && method.getParameterCount() == 1
                 && method.getParameterTypes()[0] == Message.class) {
-            final Message message = (Message) ctx.getParameters()[0];
-
-            final SecureMessage secureMessage = message.getBody(SecureMessage.class);
+            final ObjectMessage message = (ObjectMessage) ctx.getParameters()[0];
+            final SecureObjectMessage secureMessage = (SecureObjectMessage) message.getObject();
 
             final Principal principal = secureMessage.getPrincipal();
             final Subject subject = secureMessage.getSubject();
@@ -38,11 +37,11 @@ public final class JmsSecurityInterceptor {
             final Identity identity = CredentialIdentityFactory.createIdentity(principal, credential, roleGroup);
             securityContext.getUtil().createSubjectInfo(identity, subject);
 
-            final ObjectMessage proxyMessage = (ObjectMessage) Proxy.newProxyInstance(
+            final ObjectMessage proxiedMessage = (ObjectMessage) Proxy.newProxyInstance(
                     ObjectMessage.class.getClassLoader(),
                     new Class[]{ObjectMessage.class},
-                    new MessageBodyProxy(message));
-            ctx.setParameters(new Object[]{proxyMessage});
+                    new ObjectMessageProxy(message));
+            ctx.setParameters(new Object[]{proxiedMessage});
         }
 
         return ctx.proceed();

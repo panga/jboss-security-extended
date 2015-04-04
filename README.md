@@ -1,11 +1,6 @@
 # JBoss/WildFly JMS Security
 
-Propagate Security Context through JMS in JBoss/WildFly.
-
-* Prerequisites
-
-1. JavaEE 7 JBoss/WildFly container
-2. Security domain configuration
+Propagate Security Context through JMS in JBoss/WildFly container.
 
 * Build
 
@@ -33,8 +28,11 @@ public class QueueSender {
     @Resource(mappedName = "java:/jms/Queue")
     private Queue destination;
 
+    @Resource
+    private EJBContext context;
+
     public void sendToQueue(final MyObject myObject) {
-        final SecureMessage message = new SecureMessage(myObject);
+        final SecureObjectMessage message = new SecureObjectMessage(myObject, context.getCallerPrincipal());
         jmsContext.createProducer().send(destination, message);
     }
 }

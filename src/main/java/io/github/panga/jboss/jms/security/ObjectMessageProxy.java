@@ -3,25 +3,24 @@ package io.github.panga.jboss.jms.security;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
-class MessageBodyProxy implements InvocationHandler {
+class ObjectMessageProxy implements InvocationHandler {
 
-    private final Message message;
+    private final ObjectMessage message;
 
-    public MessageBodyProxy(final Message message) {
+    public ObjectMessageProxy(final ObjectMessage message) {
         this.message = message;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if ("getObject".equals(method.getName())) {
-            final SecureMessage secureMessage = (SecureMessage) ((ObjectMessage) message).getObject();
-            return secureMessage.getContent(Serializable.class);
+            final SecureObjectMessage secureMessage = (SecureObjectMessage) ((ObjectMessage) message).getObject();
+            return secureMessage.getBody(Serializable.class);
         } else if ("getBody".equals(method.getName())) {
-            final SecureMessage secureMessage = message.getBody(SecureMessage.class);
-            return secureMessage.getContent((Class) args[0]);
+            final SecureObjectMessage secureMessage = (SecureObjectMessage) message.getObject();
+            return secureMessage.getBody((Class) args[0]);
         }
 
         return method.invoke(message, args);
