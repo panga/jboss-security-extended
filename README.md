@@ -57,7 +57,7 @@ public class QueueConsumer implements MessageListener {
             final MyObject myObject = secureMessage.getContent(MyObject.class);
             securedEJB.process(myObject);
         } catch (JMSException ex) {
-            LOG.error(ex.getMessage(), ex);
+            ex.printStackTrace();
         }
     }
 
