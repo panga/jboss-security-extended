@@ -1,6 +1,11 @@
 # JBoss/WildFly JMS Security
 
-Propagate Security Context through JMS in JBoss EAP/WildFly.
+Propagate Security Context through JMS in JBoss/WildFly.
+
+* Prerequisites
+
+- JavaEE 7 JBoss/WildFly container
+- Security domain configuration
 
 * Build
 
@@ -53,9 +58,7 @@ public class QueueConsumer implements MessageListener {
     @Override
     public void onMessage(Message message) {
         try {
-            final SecureMessage secureMessage = message.getBody(SecureMessage.class);
-            final MyObject myObject = secureMessage.getContent(MyObject.class);
-            securedEJB.process(myObject);
+            securedEJB.process(message.getBody(MyObject.class));
         } catch (JMSException ex) {
             ex.printStackTrace();
         }

@@ -1,12 +1,14 @@
 package io.github.panga.jboss.jms.security;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.security.Principal;
 import java.security.acl.Group;
 import java.util.Set;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import javax.jms.Message;
+import javax.jms.ObjectMessage;
 import javax.security.auth.Subject;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
@@ -15,7 +17,7 @@ import org.jboss.security.identity.Role;
 import org.jboss.security.identity.extensions.CredentialIdentityFactory;
 import org.jboss.security.identity.plugins.SimpleRoleGroup;
 
-public class JmsSecurityInterceptor {
+public final class JmsSecurityInterceptor {
 
     @AroundInvoke
     public Object intercept(InvocationContext ctx) throws Exception {
@@ -27,14 +29,20 @@ public class JmsSecurityInterceptor {
 
             final SecureMessage secureMessage = message.getBody(SecureMessage.class);
 
-            Principal principal = secureMessage.getPrincipal();
-            Subject subject = secureMessage.getSubject();
-            Object credential = secureMessage.getCredential();
-            Role roleGroup = getRoleGroup(subject);
+            final Principal principal = secureMessage.getPrincipal();
+            final Subject subject = secureMessage.getSubject();
+            final Object credential = secureMessage.getCredential();
+            final Role roleGroup = getRoleGroup(subject);
 
-            SecurityContext securityContext = SecurityContextAssociation.getSecurityContext();
-            Identity identity = CredentialIdentityFactory.createIdentity(principal, credential, roleGroup);
+            final SecurityContext securityContext = SecurityContextAssociation.getSecurityContext();
+            final Identity identity = CredentialIdentityFactory.createIdentity(principal, credential, roleGroup);
             securityContext.getUtil().createSubjectInfo(identity, subject);
+
+            final ObjectMessage proxyMessage = (ObjectMessage) Proxy.newProxyInstance(
+                    ObjectMessage.class.getClassLoader(),
+                    new Class[]{ObjectMessage.class},
+                    new MessageBodyProxy(message));
+            ctx.setParameters(new Object[]{proxyMessage});
         }
 
         return ctx.proceed();

@@ -5,7 +5,7 @@ import java.security.Principal;
 import javax.security.auth.Subject;
 import org.jboss.security.SecurityContextAssociation;
 
-public class SecureMessage implements Serializable {
+public final class SecureMessage implements Serializable {
 
     private final Serializable originalMessage;
     private final Principal principal;
