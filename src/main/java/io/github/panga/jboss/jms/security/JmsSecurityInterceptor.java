@@ -31,11 +31,13 @@ public final class JmsSecurityInterceptor {
             final Principal principal = secureMessage.getPrincipal();
             final Subject subject = secureMessage.getSubject();
             final Object credential = secureMessage.getCredential();
-            final Role roleGroup = getRoleGroup(subject);
 
-            final SecurityContext securityContext = SecurityContextAssociation.getSecurityContext();
-            final Identity identity = CredentialIdentityFactory.createIdentity(principal, credential, roleGroup);
-            securityContext.getUtil().createSubjectInfo(identity, subject);
+            if (principal != null && subject != null) {
+                final SecurityContext securityContext = SecurityContextAssociation.getSecurityContext();
+                final Role roleGroup = getRoleGroup(subject);
+                final Identity identity = CredentialIdentityFactory.createIdentity(principal, credential, roleGroup);
+                securityContext.getUtil().createSubjectInfo(identity, subject);
+            }
 
             final ObjectMessage proxiedMessage = (ObjectMessage) Proxy.newProxyInstance(
                     ObjectMessage.class.getClassLoader(),
