@@ -1,10 +1,14 @@
-package io.github.panga.jboss.jms.security;
+package com.github.panga.jboss.security.jms;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import javax.jms.ObjectMessage;
 
+/**
+ *
+ * @author Leonardo Zanivan
+ */
 class ObjectMessageProxy implements InvocationHandler {
 
     private final ObjectMessage message;

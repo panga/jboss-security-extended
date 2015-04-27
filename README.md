@@ -1,6 +1,6 @@
-# JBoss/WildFly JMS Security
+# JBoss Security Extended
 
-Propagate Security Context through JMS in JBoss/WildFly container.
+Propagate Security Context through JMS and WebSocket endpoint in JBoss/WildFly container.
 
 * Build
 
@@ -10,13 +10,13 @@ Propagate Security Context through JMS in JBoss/WildFly container.
 
 ```xml
 <dependency>
-    <groupId>io.github.panga</groupId>
-    <artifactId>jboss-jms-security</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.github.panga</groupId>
+    <artifactId>jboss-security-extended</artifactId>
+    <version>1.1.0</version>
 </dependency>
 ```
 
-* Usage
+* Usage for JMS
 
 ```java
 @Stateless
@@ -65,6 +65,36 @@ public class QueueConsumer implements MessageListener {
 }
 ```
 
+* Usage for WebSocket (must have a Session parameter)
+
+```java
+@Interceptors({WebsocketSecurityInterceptor.class})
+@ServerEndpoint(value = "/echo", configurator = WebsocketSecurityConfigurator.class)
+public class EchoEndpoint {
+
+    @Inject
+    private SecuredEJB securedEJB;
+
+    @OnOpen
+    public void open(Session session) {
+        securedEJB.process(null);
+    }
+
+    @OnMessage
+    public void message(String message, Session session) {
+        securedEJB.process(null);
+    }
+
+    @OnClose
+    public void close(Session session) {
+        securedEJB.process(null);
+    }
+
+}
+```
+
+* Secured EJB
+
 ```java
 @Stateless
 @RolesAllowed("admin")
@@ -74,7 +104,7 @@ public class SecuredEJB {
     private EJBContext context;
 
     public void process(MyObject myObject) {
-        System.out.println("Name: " + context.getCallerPrincipal().getName());
+        System.out.println("User: " + context.getCallerPrincipal().getName());
     }
 }
 ```

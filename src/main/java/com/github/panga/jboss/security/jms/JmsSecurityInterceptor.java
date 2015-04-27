@@ -1,23 +1,20 @@
-package io.github.panga.jboss.jms.security;
+package com.github.panga.jboss.security.jms;
 
+import com.github.panga.jboss.security.SecurityActions;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.security.Principal;
-import java.security.acl.Group;
-import java.util.Set;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.security.auth.Subject;
-import org.jboss.security.SecurityContext;
-import org.jboss.security.SecurityContextAssociation;
-import org.jboss.security.identity.Identity;
-import org.jboss.security.identity.Role;
-import org.jboss.security.identity.extensions.CredentialIdentityFactory;
-import org.jboss.security.identity.plugins.SimpleRoleGroup;
 
-public final class JmsSecurityInterceptor {
+/**
+ *
+ * @author Leonardo Zanivan
+ */
+public class JmsSecurityInterceptor {
 
     @AroundInvoke
     public Object intercept(InvocationContext ctx) throws Exception {
@@ -33,10 +30,7 @@ public final class JmsSecurityInterceptor {
             final Object credential = secureMessage.getCredential();
 
             if (principal != null && subject != null) {
-                final SecurityContext securityContext = SecurityContextAssociation.getSecurityContext();
-                final Role roleGroup = getRoleGroup(subject);
-                final Identity identity = CredentialIdentityFactory.createIdentity(principal, credential, roleGroup);
-                securityContext.getUtil().createSubjectInfo(identity, subject);
+                SecurityActions.setSubjectInfo(principal, subject, credential);
             }
 
             final ObjectMessage proxiedMessage = (ObjectMessage) Proxy.newProxyInstance(
@@ -48,15 +42,4 @@ public final class JmsSecurityInterceptor {
 
         return ctx.proceed();
     }
-
-    private Role getRoleGroup(final Subject subject) {
-        final Set<Group> groups = subject.getPrincipals(Group.class);
-        for (Group group : groups) {
-            if ("Roles".equals(group.getName())) {
-                return new SimpleRoleGroup(group);
-            }
-        }
-        return null;
-    }
-
 }

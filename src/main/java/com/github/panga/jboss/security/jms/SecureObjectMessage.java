@@ -1,10 +1,14 @@
-package io.github.panga.jboss.jms.security;
+package com.github.panga.jboss.security.jms;
 
+import com.github.panga.jboss.security.SecurityActions;
 import java.io.Serializable;
 import java.security.Principal;
 import javax.security.auth.Subject;
-import org.jboss.security.SecurityContextAssociation;
 
+/**
+ *
+ * @author Leonardo Zanivan
+ */
 public final class SecureObjectMessage implements Serializable {
 
     private final Serializable object;
@@ -15,8 +19,8 @@ public final class SecureObjectMessage implements Serializable {
     public SecureObjectMessage(final Serializable object, final Principal principal) {
         this.object = object;
         this.principal = principal;
-        this.subject = SecurityContextAssociation.getSubject();
-        this.credential = SecurityContextAssociation.getCredential();
+        this.subject = SecurityActions.getSubject();
+        this.credential = SecurityActions.getCredential();
     }
 
     public <T extends Serializable> T getBody(Class<T> clazz) {
