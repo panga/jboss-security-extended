@@ -26,7 +26,7 @@ public class SecurityActions {
     }
 
     public static Object getCredential() {
-        return SecurityContextAssociation.getSubject();
+        return SecurityContextAssociation.getCredential();
     }
 
     public static void setSubjectInfo(final Principal principal, final Subject subject, final Object credential) {
