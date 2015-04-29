@@ -12,7 +12,7 @@ Propagate Security Context through JMS and WebSocket endpoint in JBoss/WildFly c
 <dependency>
     <groupId>com.github.panga</groupId>
     <artifactId>jboss-security-extended</artifactId>
-    <version>1.1.0</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
