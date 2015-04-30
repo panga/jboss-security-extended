@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.panga</groupId>
     <artifactId>jboss-security-extended</artifactId>
-    <version>1.0.0-SNAPSHOT</version>    
+    <version>1.1.3-SNAPSHOT</version>    
     <packaging>jar</packaging>
     
     <name>JBoss Security Extended</name>
