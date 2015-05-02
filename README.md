@@ -2,10 +2,6 @@
 
 Propagate Security Context through JMS and WebSocket endpoint in JBoss/WildFly container.
 
-* Build
-
-```mvn clean install```
-
 * Maven
 
 ```xml
